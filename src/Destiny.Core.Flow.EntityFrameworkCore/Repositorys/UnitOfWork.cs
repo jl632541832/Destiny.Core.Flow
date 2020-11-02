@@ -5,10 +5,8 @@ using Destiny.Core.Flow.Ui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,11 +18,16 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
     /// </summary>
     public class UnitOfWork<TDbContext> : IUnitOfWork where TDbContext : DbContextBase
     {
+        /// <summary>
+        /// 释放时触发
+        /// </summary>
+        public Action OnDispose { get; set; }
+
+
         private readonly DbContextBase _dbContext = null;
 
-
         /// <summary>
-        /// 是否提交 
+        /// 是否提交
         /// </summary>
         public bool HasCommitted { get; private set; }
 
@@ -37,26 +40,20 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
 
         private readonly ILogger _logger = null;
 
-
         private DbConnection _connection = null;
 
         public UnitOfWork(TDbContext dbContext)
         {
-
             _dbContext = dbContext as DbContextBase;
-            
         }
-
 
         /// <summary>
         /// 开启事务
         /// </summary>
         public virtual void BeginTransaction()
         {
-
             if (_transaction?.Connection == null)
             {
-
                 if (_connection.State != ConnectionState.Open)
                 {
                     _connection.Open();
@@ -68,7 +65,6 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
 
             HasCommitted = false;
         }
-
 
 
         /// <summary>
@@ -92,12 +88,10 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex.Message);
                 this.Rollback();
             }
         }
-
 
         public async Task UseTranAsync(Func<Task> func)
         {
@@ -111,6 +105,7 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             await func?.Invoke();
             Commit();
         }
+
         /// <summary>
         /// 开启事务 如果成功提交事务，失败回滚事务
         /// </summary>
@@ -149,7 +144,6 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
                 };
             }
             return result;
-
         }
 
         /// <summary>
@@ -182,7 +176,6 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
                 {
                     Type = OperationResponseType.Error,
                     Message = ex.Message,
-
                 };
             }
         }
@@ -192,10 +185,8 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// </summary>
         public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
-
             if (_transaction?.Connection == null)
             {
-
                 if (_connection.State != ConnectionState.Open)
                 {
                     await _connection.OpenAsync();
@@ -204,7 +195,6 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             }
 
             _dbContext.Database.UseTransaction(_transaction);
-
 
             HasCommitted = false;
         }
@@ -238,21 +228,20 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             HasCommitted = true;
         }
 
-
         /// <summary>
         /// 得到上下文
         /// </summary>
         /// <returns></returns>
         public DbContext GetDbContext()
         {
-    
             _connection = _dbContext.Database.GetDbConnection();
             _dbContext.UnitOfWork = this;
             return _dbContext as DbContext;
         }
 
-
-        /// <summary>释放对象.</summary>
+        /// <summary>
+        /// 释放对象.
+        /// </summary>
         public void Dispose()
         {
             if (_disposed)
@@ -261,7 +250,9 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             }
             _transaction?.Dispose();
             _dbContext.Dispose();
+            OnDispose?.Invoke();
             _disposed = true;
+  
         }
 
         /// <summary>
@@ -287,7 +278,6 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// <returns></returns>
         public async Task RollbackAsync()
         {
-
             if (_transaction?.Connection != null)
             {
                 await _transaction.RollbackAsync();
@@ -299,7 +289,5 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             }
             HasCommitted = true;
         }
-
-
     }
 }

@@ -1,17 +1,12 @@
 ﻿using Destiny.Core.Flow.Entity;
-using Destiny.Core.Flow.Filter;
-using Destiny.Core.Flow.Filter.Abstract;
+using Destiny.Core.Flow.Ui;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.MongoDB.Repositorys
 {
-    public interface IMongoDBRepository<TEntity, Tkey> 
+    public interface IMongoDBRepository<TEntity, Tkey>
         where TEntity : IEntity<Tkey>
     {
         //Find<T> – 返回集合中与提供的搜索条件匹配的所有文档。
@@ -34,6 +29,26 @@ namespace Destiny.Core.Flow.MongoDB.Repositorys
 
         IMongoCollection<TEntity> Collection { get; }
 
-      
+        /// <summary>
+        /// 根据键查询
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task<TEntity> FindByIdAsync(Tkey key);
+
+        /// <summary>
+        /// 更新
+        /// </summary>
+        /// <returns></returns>
+
+        Task<OperationResponse> UpdateAsync(Tkey key, UpdateDefinition<TEntity> update);
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task<OperationResponse> DeleteAsync(Tkey key);
+
     }
 }

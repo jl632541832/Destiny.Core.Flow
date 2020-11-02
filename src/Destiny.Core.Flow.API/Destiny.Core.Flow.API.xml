@@ -4,6 +4,25 @@
         <name>Destiny.Core.Flow.API</name>
     </assembly>
     <members>
+        <member name="T:Destiny.Core.Flow.API.Controllers.AuditEntryController">
+            <summary>
+            数据审计
+            </summary>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.AuditEntryController.GetAuditEntryPageAsync(Destiny.Core.Flow.Filter.PageRequest)">
+            <summary>
+            异步得到数据审计分页
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.AuditEntryController.GetAuditEntryPropertyPageAsync(Destiny.Core.Flow.Filter.PageRequest)">
+            <summary>
+            异步得到实体属性分页
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
         <member name="T:Destiny.Core.Flow.API.Controllers.AuditLogController">
             <summary>
             审计日志
@@ -11,22 +30,37 @@
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.AuditLogController.GetAuditLogPageAsync(Destiny.Core.Flow.Filter.PageRequest)">
             <summary>
-            异步得到功能分页
+            分页获取审计日志
             </summary>
             <param name="request"></param>
             <returns></returns>
         </member>
-        <member name="M:Destiny.Core.Flow.API.Controllers.AuditLogController.GetAuditEntryListByAuditLogIdAsync(System.Nullable{System.Guid})">
+        <member name="M:Destiny.Core.Flow.API.Controllers.AuditLogController.GetAuditEntryListByAuditLogIdAsync(System.String)">
             <summary>
             获取操作实体列表
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Destiny.Core.Flow.API.Controllers.AuditLogController.GetAuditEntryListByAuditEntryIdAsync(System.Nullable{System.Guid})">
+        <member name="M:Destiny.Core.Flow.API.Controllers.AuditLogController.GetAuditEntryListByAuditEntryIdAsync(System.String)">
             <summary>
             获取实体属性列表
             </summary>
             <returns></returns>
+        </member>
+        <member name="T:Destiny.Core.Flow.API.Controllers.CodeGeneratorController">
+            <summary>
+            代码生成器
+            </summary>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.CodeGeneratorController.GenerateCode(Destiny.Core.Flow.CodeGenerator.ProjectMetadata)">
+            <summary>
+            代码生成
+            </summary>
+        </member>
+        <member name="T:Destiny.Core.Flow.API.Controllers.DataDictionary.DataDictionaryController">
+            <summary>
+            数据字典
+            </summary>
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.DataDictionary.DataDictionaryController.GetPageListAsync(Destiny.Core.Flow.Filter.PageRequest)">
             <summary>
@@ -108,6 +142,19 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.FunctionController.LoadAsync(System.Guid)">
+            <summary>
+            异步加载功能
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.FunctionController.AddOrUpdateAsync(Destiny.Core.Flow.Dtos.Functions.FunctionInputDto)">
+            <summary>
+            异步创建或更新功能
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.HealthController.Get">
             <summary>
             健康监测
@@ -119,12 +166,24 @@
             身份管理
             </summary>
         </member>
-        <member name="M:Destiny.Core.Flow.API.Controllers.IdentityController.LoginAsync(Destiny.Core.Flow.Dtos.Identitys.LoginDto)">
+        <member name="M:Destiny.Core.Flow.API.Controllers.IdentityController.LoginAsync(Destiny.Core.Flow.Dtos.LoginDto)">
             <summary>
             登录
             </summary>
             <param name="loginDto"></param>
             <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.IdentityController.ChangePassword(Destiny.Core.Flow.Dtos.ChangePassInputDto)">
+            <summary>
+            更新密码
+            </summary>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Destiny.Core.Flow.API.Controllers.Menu.MenuController">
+            <summary>
+            菜单管理
+            </summary>
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.Menu.MenuController.GetTableAsync">
             <summary>
@@ -149,6 +208,13 @@
             <summary>
             删除
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.Menu.MenuController.LoadFormMenuAsync(System.Guid)">
+            <summary>
+            异步加载表单菜单
+            </summary>
+            <param name="Id"></param>
             <returns></returns>
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.Menu.MenuController.GetMenuAsync">
@@ -186,6 +252,24 @@
             异步到菜单功能集合
             </summary>
             <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.Menu.MenuController.GetMenuPageAsync(Destiny.Core.Flow.Filter.PageRequest)">
+            <summary>
+            异步得到菜单分页数据（不是树，只是普通表格）
+            </summary>
+            <param name="request">请求参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.Menu.MenuController.GetAllMenuTreeAsync">
+            <summary>
+            异步得到所有菜单
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Destiny.Core.Flow.API.Controllers.Organization.OrganizationController">
+            <summary>
+            组织架构管理
+            </summary>
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.Organization.OrganizationController.GetAsync">
             <summary>
@@ -238,14 +322,14 @@
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.RoleController.CreateAsync(Destiny.Core.Flow.Dtos.RoleDtos.RoleInputDto)">
             <summary>
-            
+            异步创建角色
             </summary>
             <param name="dto"></param>
             <returns></returns>
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.RoleController.UpdateAsync(Destiny.Core.Flow.Dtos.RoleDtos.RoleInputDto)">
             <summary>
-            
+            异步更新角色
             </summary>
             <param name="dto"></param>
         </member>
@@ -257,13 +341,19 @@
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.RoleController.AddOrUpdateAsync(Destiny.Core.Flow.Dtos.RoleDtos.RoleInputDto)">
             <summary>
-            删除角色
+            异步创建或添加角色
             </summary>
             <param name="dto"></param>
         </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.RoleController.GetRoleSelectListAsync">
             <summary>
             异步得到角色下拉数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.RoleController.SetRoleMenuAsync(System.Guid,System.Guid[])">
+            <summary>
+            异步设置角色菜单
             </summary>
             <returns></returns>
         </member>
@@ -300,11 +390,24 @@
             <param name="id">主键</param>
             <returns></returns>
         </member>
+        <member name="M:Destiny.Core.Flow.API.Controllers.UserController.AllocationRoleAsync(Destiny.Core.Flow.Dtos.UserAllocationRoleInputDto)">
+            <summary>
+            用户分配角色
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Destiny.Core.Flow.API.Controllers.UserController.GetUserPageAsync(Destiny.Core.Flow.Filter.PageRequest)">
             <summary>
             异步得到分页
             </summary>
             <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Destiny.Core.Flow.API.Startups.EntityFrameworkCoreMySqlModule.ReadAllText(Microsoft.Extensions.FileProviders.IFileInfo)">
+            <summary>
+            读取全部文本
+            </summary>
+            <param name="fileInfo"></param>
             <returns></returns>
         </member>
     </members>

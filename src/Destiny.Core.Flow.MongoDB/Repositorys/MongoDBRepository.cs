@@ -1,17 +1,15 @@
 ﻿using Destiny.Core.Flow.Entity;
 using Destiny.Core.Flow.Extensions;
-using Destiny.Core.Flow.Filter;
-using Destiny.Core.Flow.Filter.Abstract;
 using Destiny.Core.Flow.MongoDB.DbContexts;
+using Destiny.Core.Flow.Ui;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Security.Principal;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.MongoDB.Repositorys
@@ -46,12 +44,78 @@ namespace Destiny.Core.Flow.MongoDB.Repositorys
         }
 
 
+        public async Task<TEntity> FindByIdAsync(Tkey key)
+        {
+
+            return await Collection.Find(CreateEntityFilter(key)).FirstOrDefaultAsync();
+        }
 
 
-        public virtual IMongoQueryable<TEntity> Entities => Collection.AsQueryable();
+        private IMongoQueryable<TEntity> CreateQuery()
+        {
+            var entities = Collection.AsQueryable();
+            if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            {
+                entities = entities.Where(m => ((ISoftDelete)m).IsDeleted == false);
 
-      
+            }
+            return entities;
+        }
 
+
+        private Expression<Func<TEntity, bool>> CreateExpression(Expression<Func<TEntity, bool>> expression)
+        {
+            Expression<Func<TEntity, bool>> expression1 = o => true;
+            if (expression == null)
+            {
+                expression = o => true;
+            }
+            if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            {
+                expression1 = m => ((ISoftDelete)m).IsDeleted == false;
+                expression = expression.And(expression1);
+            }
+            return expression;
+
+
+        }
+        public virtual IMongoQueryable<TEntity> Entities => CreateQuery();
+
+
+        private FilterDefinition<TEntity> CreateEntityFilter(Tkey id)
+        {
+            var filters = new List<FilterDefinition<TEntity>>
+            {
+                Builders<TEntity>.Filter.Eq(e => e.Id, id)
+            };
+            AddGlobalFilters(filters);
+            return Builders<TEntity>.Filter.And(filters);
+        }
+        private void AddGlobalFilters(List<FilterDefinition<TEntity>> filters)
+        {
+            if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            {
+                filters.Add(Builders<TEntity>.Filter.Eq(e => ((ISoftDelete)e).IsDeleted, false));
+            }
+
+        }
+
+        public async Task<OperationResponse> UpdateAsync(Tkey key, UpdateDefinition<TEntity> update)
+        {
+
+            var filters = this.CreateEntityFilter(key);
+
+
+            var result = await Collection.UpdateManyAsync(filters, update);
+            return result.ModifiedCount > 0 ? OperationResponse.Ok("更新成功") : OperationResponse.Error("更新失败");
+        }
+
+        public async Task<OperationResponse> DeleteAsync(Tkey key)
+        {
+            var filters = this.CreateEntityFilter(key);
+            var result = await Collection.DeleteOneAsync(filters);
+            return result.DeletedCount > 0 ? OperationResponse.Ok("删除成功") : OperationResponse.Error("删除失败");
+        }
     }
 }
 

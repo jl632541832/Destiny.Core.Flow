@@ -1,30 +1,25 @@
 ﻿using Destiny.Core.Flow;
 using Destiny.Core.Flow.Entity;
 using Destiny.Core.Flow.ExpressionUtil;
+using Destiny.Core.Flow.Extensions;
 using Destiny.Core.Flow.Filter;
-using Destiny.Core.Flow.Modules;
+using Destiny.Core.Flow.Filter.Abstract;
 using Destiny.Core.Flow.MongoDB;
 using Destiny.Core.Flow.MongoDB.DbContexts;
 using Destiny.Core.Flow.MongoDB.Repositorys;
 using Destiny.Core.Flow.TestBase;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Destiny.Core.Flow.Extensions;
-using Destiny.Core.Flow.Filter.Abstract;
 
 namespace Destiny.Core.Tests
 {
@@ -33,10 +28,10 @@ namespace Destiny.Core.Tests
     public class MongoDBTests : IntegratedTest<MongoDBModelule>
     {
 
-        private readonly IMongoDBRepository<TestDB, Guid> _mongoDBRepository = null;
+        private readonly IMongoDBRepository<TestDB, ObjectId> _mongoDBRepository = null;
         public MongoDBTests()
         {
-            _mongoDBRepository = ServiceProvider.GetService<IMongoDBRepository<TestDB, Guid>>();
+            _mongoDBRepository = ServiceProvider.GetService<IMongoDBRepository<TestDB, ObjectId>>();
             //BsonClassMap.RegisterClassMap<Test001>(cm =>
             //{
             //    cm.MapIdProperty(o => o.Id);
@@ -53,24 +48,32 @@ namespace Destiny.Core.Tests
         public async Task InsertEntityAsync_Test()
         {
 
-            TestDB test = new TestDB();
-            test.IsDeleted = false;
-            test.CreatedTime = DateTime.Now;
-            test.Name = $"大黄瓜18CM";
-            await _mongoDBRepository.InsertAsync(test);
 
-            var entitie = await _mongoDBRepository.Entities.Where(o => o.Id == test.Id).FirstOrDefaultAsync();
-            Assert.True(entitie.Name == "大黄瓜18CM");
+            for (int i = 0; i < 100; i++)
+            {
+                TestDB test = new TestDB();
+                test.IsDeleted = false;
+                test.CreatedTime = DateTime.Now;
+                test.Name = $"大黄瓜18CM_{i}";
+                test.Id = ObjectId.GenerateNewId();
+                await _mongoDBRepository.InsertAsync(test);
+            }
+
+            var count = await _mongoDBRepository.Entities.CountAsync();
+            Assert.True(count > 0);
         }
+
+
+
 
         [Fact]
         public async Task GetPageAsync_Test()
         {
             FilterCondition condition = new FilterCondition();
             QueryFilter filter = new QueryFilter();
-            //condition.Field = "Name";
-            //condition.Value = "大黄瓜18CM";
-            //filter.Conditions.Add(condition);
+            condition.Field = "Name";
+            condition.Value = "大黄瓜18CM";
+            filter.Conditions.Add(condition);
             var exp = FilterBuilder.GetExpression<TestDB>(filter);
             OrderCondition[] orderConditions = new OrderCondition[] {
                 new OrderCondition("Name",Flow.Enums.SortDirection.Descending),
@@ -88,16 +91,36 @@ namespace Destiny.Core.Tests
                 Id = o.Id,
                 Name = o.Name
             });
-   
-           
+
+
             Assert.True(page1.ItemList.Count == 10);
 
         }
 
 
 
+        [Fact]
+        public async Task UpdateAsync_Test()
+        {
 
 
+            try
+            {
+
+                //var entity =await  _mongoDBRepository.FindAsync(new ObjectId("5f5b695806303c854f0ba8be"));
+
+                var update = Builders<TestDB>.Update
+            .Set(t => t.IsDeleted, true);
+                var filter = Builders<TestDB>.Filter.Eq(e => e.Id, new ObjectId("5f5b695906303c854f0ba8bf"));
+                var re = await _mongoDBRepository.Collection.UpdateOneAsync(filter, update);
+                Assert.True(re.ModifiedCount > 0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
     }
 
     public class PagedRequest : IPagedRequest
@@ -178,17 +201,16 @@ namespace Destiny.Core.Tests
 
 
 
-    
+
 
     [MongoDBTable("TestDB")]//
-    
-    public class TestDB : EntityBase<Guid>, IFullAuditedEntity<Guid>
+
+    public class TestDB : MongoEntity, IFullAuditedEntity<ObjectId>
     {
-        public TestDB()
-        {
-            Id = Guid.NewGuid();
-            
-        }
+
+
+
+
 
 
         public string Name { get; set; }
@@ -197,12 +219,12 @@ namespace Destiny.Core.Tests
         ///  获取或设置 最后修改用户
         /// </summary>
         [DisplayName("最后修改用户")]
-        public virtual Guid? LastModifierUserId { get; set; }
+        public virtual ObjectId? LastModifierUserId { get; set; }
         /// <summary>
         /// 获取或设置 最后修改时间
         /// </summary>
         [DisplayName("最后修改时间")]
-        public virtual DateTime? LastModifierTime { get; set; }
+        public virtual DateTime? LastModifionTime { get; set; }
         /// <summary>
         ///获取或设置 是否删除
         /// </summary>
@@ -212,48 +234,51 @@ namespace Destiny.Core.Tests
         ///获取或设置 创建用户ID
         /// </summary>
         [DisplayName("创建用户ID")]
-        public virtual Guid? CreatorUserId { get; set; }
+        public virtual ObjectId? CreatorUserId { get; set; }
         /// <summary>
         ///获取或设置 创建时间
         /// </summary>
         [DisplayName("创建时间")]
         public virtual DateTime CreatedTime { get; set; }
+
+
     }
 
 
     public class TestDto
-    { 
-      public Guid Id { get; set; }
+    {
+        public ObjectId Id { get; set; }
 
-      public string Name { get; set; }
+        public string Name { get; set; }
     }
 
     public static partial class Extensions
     {
 
-        private static ConcurrentDictionary<Type,string> Dic = new System.Collections.Concurrent.ConcurrentDictionary<Type, string>();
+        private static ConcurrentDictionary<Type, string> Dic = new System.Collections.Concurrent.ConcurrentDictionary<Type, string>();
 
         public static BsonClassMap<TEntity> ToCollection<TEntity>(this BsonClassMap<TEntity> bson, string collection)
         {
-        
+
             Dic.GetOrAdd(bson.ClassType, collection);
             return bson;
         }
 
         public static string GetBsonClassCollection(Type type)
         {
-            Dic.TryGetValue(type,out string value);
+            Dic.TryGetValue(type, out string value);
             return value;
         }
 
     }
 
-    public class Test001 { 
-    
-       public Guid Id { get; set; }
+    public class Test001
+    {
 
-       public string Name { get; set; }
+        public ObjectId Id { get; set; }
 
-       
+        public string Name { get; set; }
+
+
     }
 }

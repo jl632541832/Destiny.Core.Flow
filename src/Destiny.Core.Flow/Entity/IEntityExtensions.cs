@@ -1,13 +1,6 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Destiny.Core.Flow.Extensions;
+﻿using Destiny.Core.Flow.Extensions;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Security.Principal;
-using System.Text;
 
 namespace Destiny.Core.Flow.Entity
 {
@@ -96,7 +89,7 @@ namespace Destiny.Core.Flow.Entity
 
             IModificationAudited<TUserKey> entity1 = (IModificationAudited<TUserKey>)entity;
             entity1.LastModifierUserId = principal?.Identity?.GetUesrId<TUserKey>();
-            entity1.LastModifierTime = DateTime.Now;
+            entity1.LastModifionTime = DateTime.Now;
             return (TEntity)entity1;
         }
     }

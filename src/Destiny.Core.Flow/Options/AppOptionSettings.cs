@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Destiny.Core.Flow.Options
+﻿namespace Destiny.Core.Flow.Options
 {
     public class AppOptionSettings
     {
 
         public AppOptionSettings()
         {
-          
+
         }
 
 
@@ -21,6 +17,8 @@ namespace Destiny.Core.Flow.Options
         public JwtOptions Jwt { get; set; }
 
         public CorsOptions Cors { get; set; }
+
+        public AuthOptions Auth { get; set; }
 
         /// <summary>
         /// 是否自动添加功能

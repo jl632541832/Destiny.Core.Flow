@@ -1,27 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-
-using Destiny.Core.Flow.AspNetCore.Api;
+﻿using Destiny.Core.Flow.AspNetCore.Api;
 using Destiny.Core.Flow.AspNetCore.Ui;
-using Destiny.Core.Flow.Dtos;
 using Destiny.Core.Flow.Dtos.Menu;
 using Destiny.Core.Flow.Dtos.MenuFunction;
 using Destiny.Core.Flow.Filter;
 using Destiny.Core.Flow.IServices.IMenu;
 using Destiny.Core.Flow.Permission;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.API.Controllers.Menu
 {
+    /// <summary>
+    /// 菜单管理
+    /// </summary>
     [Description("菜单管理")]
-    [Authorize]
-    public class MenuController : ApiControllerBase
+    
+    public class MenuController : AuthorizeControllerBase
     {
         private readonly IMenuServices _menuServices;
         private readonly IMenuFunctionServices _menuFunctionServices;
@@ -62,6 +59,7 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
                 Success = result.Success
             };
         }
+
         /// <summary>
         /// 添加菜单
         /// </summary>
@@ -76,6 +74,7 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
             }
             return (await _menuServices.UpdateAsync(dto)).ToAjaxResult();
         }
+
         /// <summary>
         /// 修改菜单
         /// </summary>
@@ -96,12 +95,20 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
         {
             return (await _menuServices.DeleteAsync(id.Value)).ToAjaxResult();
         }
+
+
+        /// <summary>
+        /// 异步加载表单菜单
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Description("获取一个菜单")]
         public async Task<AjaxResult> LoadFormMenuAsync(Guid Id)
         {
             return (await _menuServices.LoadFormMenuAsync(Id)).ToAjaxResult();
         }
+
         /// <summary>
         /// 登录成功之后获取菜单
         /// </summary>
@@ -125,6 +132,7 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
         {
             return (await _menuServices.GetUserMenuTreeAsync()).ToAjaxResult();
         }
+
         /// <summary>
         /// 异步得到菜单树数据
         /// </summary>
@@ -136,6 +144,7 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
         {
             return (await _menuServices.GetMenuTreeAsync(roleId)).ToAjaxResult();
         }
+
         /// <summary>
         /// 异步得到菜单下的按钮
         /// </summary>
@@ -148,6 +157,7 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
         {
             return (await _menuServices.GetMenuChildrenButton(menuId.Value)).ToAjaxResult();
         }
+
         /// <summary>
         /// 获取登录用户权限菜单
         /// </summary>
@@ -160,6 +170,7 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
         {
             return (await _menuServices.GetMenuListAsync()).ToAjaxResult();
         }
+
         /// <summary>
         /// 异步到菜单功能集合
         /// </summary>
@@ -170,6 +181,35 @@ namespace Destiny.Core.Flow.API.Controllers.Menu
         public async Task<PageList<MenuFunctionOutPageListDto>> GetMenuFunctionListAsync(Guid id)
         {
             return (await _menuFunctionServices.GetMenuFunctionListAsync(id)).ToPageList();
+        }
+
+        /// <summary>
+        /// 异步得到菜单分页数据（不是树，只是普通表格）
+        /// </summary>
+        /// <param name="request">请求参数</param>
+        /// <returns></returns>
+
+        [HttpPost]
+        [Description("异步得到菜单分页数据")]
+       
+        public async Task<PageList<MenuOutPageListDto>> GetMenuPageAsync([FromBody] PageRequest request)
+        {
+
+            return (await _menuServices.GetMenuPageAsync(request)).ToPageList();
+        
+        }
+
+        /// <summary>
+        /// 异步得到所有菜单
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Description("异步得到所有菜单")]
+       
+        public async Task<TreeModel<MenuTreeOutDto>> GetAllMenuTreeAsync()
+        {
+
+            return (await _menuServices.GetAllMenuTreeAsync()).ToTreeModel();
         }
     }
 }

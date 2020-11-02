@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Destiny.Core.Flow.AspNetCore.Api;
 using Destiny.Core.Flow.AspNetCore.Ui;
 using Destiny.Core.Flow.Audit;
 using Destiny.Core.Flow.Audit.Dto;
 using Destiny.Core.Flow.Filter;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.API.Controllers
 {
@@ -17,8 +16,8 @@ namespace Destiny.Core.Flow.API.Controllers
     /// 审计日志
     /// </summary>
     [Description("审计日志")]
-    [Authorize]
-    public class AuditLogController : ControllerBase
+    [AllowAnonymous]
+    public class AuditLogController : ApiControllerBase
     {
         private readonly IAuditStore _auditStore = null;
 
@@ -27,7 +26,7 @@ namespace Destiny.Core.Flow.API.Controllers
             _auditStore = auditStore;
         }
         /// <summary>
-        /// 异步得到功能分页
+        /// 分页获取审计日志
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -43,9 +42,10 @@ namespace Destiny.Core.Flow.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Description("获取操作实体列表")]
-        public async Task<AjaxResult> GetAuditEntryListByAuditLogIdAsync(Guid? id)
+        public async Task<AjaxResult> GetAuditEntryListByAuditLogIdAsync(string id)
         {
-            return (await _auditStore.GetAuditEntryListByAuditLogIdAsync(id.Value)).ToAjaxResult();
+            ObjectId.TryParse(id, out ObjectId objectId);
+            return (await _auditStore.GetAuditEntryListByAuditLogIdAsync(objectId)).ToAjaxResult();
         }
         /// <summary>
         /// 获取实体属性列表
@@ -53,9 +53,10 @@ namespace Destiny.Core.Flow.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Description("获取实体属性列表")]
-        public async Task<AjaxResult> GetAuditEntryListByAuditEntryIdAsync(Guid? id)
+        public async Task<AjaxResult> GetAuditEntryListByAuditEntryIdAsync(string id)
         {
-            return (await _auditStore.GetAuditEntryListByAuditEntryIdAsync(id.Value)).ToAjaxResult();
+            ObjectId.TryParse(id, out ObjectId objectId);
+            return (await _auditStore.GetAuditEntryListByAuditEntryIdAsync(objectId)).ToAjaxResult();
         }
     }
 }

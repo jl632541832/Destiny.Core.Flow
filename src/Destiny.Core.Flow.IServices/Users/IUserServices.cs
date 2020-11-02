@@ -1,28 +1,21 @@
-﻿
-using Destiny.Core.Flow.Dependency;
+﻿using Destiny.Core.Flow.Dependency;
 using Destiny.Core.Flow.Dtos;
 using Destiny.Core.Flow.Filter;
 using Destiny.Core.Flow.Filter.Abstract;
 using Destiny.Core.Flow.Ui;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.IServices
 {
-   public interface IUserServices: IScopedDependency
+    public interface IUserServices : IScopedDependency
     {
-
         /// <summary>
         /// 异步创建用户
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
         Task<OperationResponse> CreateAsync(UserInputDto dto);
-
-       
-
 
         /// <summary>
         /// 删除用户
@@ -38,7 +31,6 @@ namespace Destiny.Core.Flow.IServices
         /// <returns></returns>
         Task<OperationResponse> UpdateAsync(UserUpdateInputDto dto);
 
-
         /// <summary>
         /// 异步加载表单用户
         /// </summary>
@@ -52,5 +44,12 @@ namespace Destiny.Core.Flow.IServices
         /// <param name="request"></param>
         /// <returns></returns>
         Task<IPagedResult<UserOutputPageListDto>> GetUserPageAsync(PageRequest request);
+
+        /// <summary>
+        /// 用户分配角色
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        Task<OperationResponse> AllocationRoleAsync(UserAllocationRoleInputDto dto);
     }
 }

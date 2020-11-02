@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Destiny.Core.Flow.AspNetCore.Api;
+﻿using Destiny.Core.Flow.AspNetCore.Api;
 using Destiny.Core.Flow.AspNetCore.Ui;
 using Destiny.Core.Flow.IServices.Permission;
-
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.API.Controllers
 {
@@ -17,8 +13,8 @@ namespace Destiny.Core.Flow.API.Controllers
     /// 权限管理
     /// </summary>
     [Description("权限管理")]
-    [Authorize]
-    public class PermissionController :ApiControllerBase
+
+    public class PermissionController : AuthorizeControllerBase
     {
 
         private IPermissionService _permissionService = null;
@@ -36,7 +32,7 @@ namespace Destiny.Core.Flow.API.Controllers
         [HttpGet]
         public async Task<AjaxResult> GetPermissionListAsync()
         {
-           return (await _permissionService.GetRolePermissionListAsync()).ToAjaxResult();
+            return (await _permissionService.GetRolePermissionListAsync()).ToAjaxResult();
         }
     }
 }

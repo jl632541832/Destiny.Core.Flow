@@ -1,10 +1,6 @@
-﻿using Destiny.Core.Flow.Dependency;
-using Destiny.Core.Flow.Dtos;
-using Destiny.Core.Flow.Dtos.Menu;
+﻿using Destiny.Core.Flow.Dtos.Menu;
 using Destiny.Core.Flow.Entity;
-using Destiny.Core.Flow.EntityFrameworkCore;
 using Destiny.Core.Flow.Enums;
-using Destiny.Core.Flow.ExpressionUtil;
 using Destiny.Core.Flow.Extensions;
 using Destiny.Core.Flow.Filter;
 using Destiny.Core.Flow.Filter.Abstract;
@@ -15,10 +11,7 @@ using Destiny.Core.Flow.Model.Entities.Rolemenu;
 using Destiny.Core.Flow.Repository.MenuRepository;
 using Destiny.Core.Flow.Ui;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +21,6 @@ using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.Services.Menu
 {
-
     public class MenuServices : IMenuServices
     {
         private readonly IMenuRepository _menuRepository = null;
@@ -39,6 +31,7 @@ namespace Destiny.Core.Flow.Services.Menu
         private readonly IEFCoreRepository<UserRole, Guid> _repositoryUserRole = null;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
+
         public MenuServices(IMenuRepository menuRepository, IUnitOfWork unitOfWork, IEFCoreRepository<RoleMenuEntity, Guid> roleMenuRepository, IMenuFunctionRepository menuFunction, IPrincipal principal, UserManager<User> userManager, RoleManager<Role> roleManager, IEFCoreRepository<UserRole, Guid> repositoryUserRole)
         {
             _menuRepository = menuRepository;
@@ -92,14 +85,13 @@ namespace Destiny.Core.Flow.Services.Menu
                 return new OperationResponse("保存成功", OperationResponseType.Success);
             });
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="roleid">角色Id</param>
         /// <returns></returns>
         public async Task<OperationResponse<SelectedItem<MenuTreeOutDto, Guid>>> GetMenuTreeAsync(Guid? roleId)
         {
-
             var rolelist = new List<RoleMenuEntity>();
             var list = await _menuRepository.Entities.ToTreeResultAsync<MenuEntity, MenuTreeOutDto>(
                 (r, c) =>
@@ -131,20 +123,7 @@ namespace Destiny.Core.Flow.Services.Menu
             return operationResponse;
         }
 
-        //public async Task<OperationResponse> GetTreeSelectTreeDataAsync()
-        //{
-        //    OperationResponse response = new OperationResponse();
-        //    var list=  await _menuRepository.Entities.ToListAsync();
-        //    var permissionTreeItems = await GetMenuTreeAsync();
-
-
-        //    response.IsSuccess("查询成功", new
-        //    {
-        //        TreeItemData = list,
-        //        SelectTreeItems = permissionTreeItems
-        //    });
-        //    return response;
-        //}
+    
         /// <summary>
         /// 根据ID获取一个菜单
         /// </summary>
@@ -157,6 +136,7 @@ namespace Destiny.Core.Flow.Services.Menu
             menudto.FunctionIds = (await _menuFunction.Entities.Where(x => x.MenuId == Id && x.IsDeleted == false).ToListAsync()).Select(x => x.FunctionId).ToArray();
             return new OperationResponse<MenuOutputLoadDto>(MessageDefinitionType.LoadSucces, menudto, OperationResponseType.Success);
         }
+
         /// <summary>
         /// 根据ID获取一个菜单
         /// </summary>
@@ -171,7 +151,7 @@ namespace Destiny.Core.Flow.Services.Menu
             var menuId = (await _roleMenuRepository.Entities.Where(x => roleids.Contains(x.RoleId)).ToListAsync()).Select(x => x.MenuId);
             if (usermodel.IsSystem && _roleManager.Roles.Where(x => x.IsAdmin == true && roleids.Contains(x.Id)).Any())
             {
-                var menus = await _menuRepository.Entities.Where(x => x.ParentId == Id && x.Type == MenuEnum.Button ).Select(a => new MenuOutputLoadDto
+                var menus = await _menuRepository.Entities.Where(x => x.ParentId == Id && x.Type == MenuEnum.Button).Select(a => new MenuOutputLoadDto
                 {
                     Name = a.Name,
                     Path = a.Path,
@@ -191,6 +171,7 @@ namespace Destiny.Core.Flow.Services.Menu
             }).ToListAsync();
             return new OperationResponse<List<MenuOutputLoadDto>>(MessageDefinitionType.LoadSucces, menu, OperationResponseType.Success);
         }
+
         public async Task<TreeResult<MenuTableOutDto>> GetMenuTableAsync()
         {
             return await _menuRepository.Entities.ToTreeResultAsync<MenuEntity, MenuTableOutDto>(
@@ -209,10 +190,9 @@ namespace Destiny.Core.Flow.Services.Menu
                  p.children.AddRange(children);
              }
              );
-
         }
+
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         public async Task<OperationResponse<Dictionary<string, bool>>> GetMenuAsync()
@@ -225,7 +205,7 @@ namespace Destiny.Core.Flow.Services.Menu
             var menuId = (await _roleMenuRepository.Entities.Where(x => roleids.Contains(x.RoleId)).ToListAsync()).Select(x => x.MenuId);
             if (usermodel.IsSystem && _roleManager.Roles.Where(x => x.IsAdmin == true && roleids.Contains(x.Id)).Any())
             {
-                menulist.AddRange(await _menuRepository.Entities.Where(x=>x.Type == MenuEnum.Menu).Select(x => new MenuPermissionsOutDto
+                menulist.AddRange(await _menuRepository.Entities.Where(x => x.Type == MenuEnum.Menu).Select(x => new MenuPermissionsOutDto
                 {
                     Name = x.Name,
                     RouterPath = x.Path,
@@ -238,7 +218,7 @@ namespace Destiny.Core.Flow.Services.Menu
                 }
                 return new OperationResponse<Dictionary<string, bool>>(MessageDefinitionType.LoadSucces, dic, OperationResponseType.Success);
             }
-            menulist.AddRange(await _menuRepository.Entities.Where(x => x.Type==MenuEnum.Menu).Select(x => new MenuPermissionsOutDto
+            menulist.AddRange(await _menuRepository.Entities.Where(x => x.Type == MenuEnum.Menu).Select(x => new MenuPermissionsOutDto
             {
                 Name = x.Name,
                 RouterPath = x.Path,
@@ -254,6 +234,7 @@ namespace Destiny.Core.Flow.Services.Menu
             }
             return new OperationResponse<Dictionary<string, bool>>(MessageDefinitionType.LoadSucces, dic, OperationResponseType.Success);
         }
+
         /// <summary>
         /// 获取菜单树形
         /// </summary>
@@ -308,7 +289,6 @@ namespace Destiny.Core.Flow.Services.Menu
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <returns></returns>
         public async Task<OperationResponse> GetMenuListAsync()
@@ -328,7 +308,6 @@ namespace Destiny.Core.Flow.Services.Menu
                     Sort = x.Sort,
                 }).ToListAsync());
                 return new OperationResponse(MessageDefinitionType.LoadSucces, menulist, OperationResponseType.Success);
-
             }
             menulist.AddRange(await _menuRepository.Entities.Where(x => menuId.Contains(x.Id)).Select(x => new MenuPermissionsOutDto
             {
@@ -338,6 +317,43 @@ namespace Destiny.Core.Flow.Services.Menu
                 Sort = x.Sort,
             }).ToListAsync());
             return new OperationResponse(MessageDefinitionType.LoadSucces, menulist, OperationResponseType.Success);
+        }
+
+        /// <summary>
+        /// 异步得到所有菜单
+        /// </summary>
+        /// <returns></returns>
+        public async Task<TreeResult<MenuTreeOutDto>> GetAllMenuTreeAsync(MenuEnum menu= MenuEnum.Menu)
+        {
+            return await _menuRepository.Entities.Where(o=>o.Type== menu).ToTreeResultAsync<MenuEntity, MenuTreeOutDto>(
+              (p, c) =>
+              {
+                  return c.ParentId == null || c.ParentId == Guid.Empty;
+              },
+              (p, c) =>
+              {
+                  return p.Id == c.ParentId;
+              },
+              (p, children) =>
+              {
+                  if (p.children == null)
+                      p.children = new List<MenuTreeOutDto>();
+                  p.children.AddRange(children);
+              }
+              );
+        }
+
+        /// <summary>
+        /// 得到菜单分页数据（不是树，只是普通表格）
+        /// </summary>
+        /// <param name="request">请求参数</param>
+        /// <returns></returns>
+        public async Task<IPagedResult<MenuOutPageListDto>> GetMenuPageAsync(PageRequest request)
+        {
+            request.NotNull(nameof(request));
+            OrderCondition<MenuEntity>[] orderConditions = new OrderCondition<MenuEntity>[] { new OrderCondition<MenuEntity>(o => o.CreatedTime, SortDirection.Descending) };
+            request.OrderConditions = orderConditions;
+            return await _menuRepository.Entities.ToPageAsync<MenuEntity, MenuOutPageListDto>(request);
         }
     }
 }

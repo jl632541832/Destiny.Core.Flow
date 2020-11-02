@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MongoDB.Bson;
+using System;
 using System.Reflection;
-using System.Text;
 
 namespace Destiny.Core.Flow.Extensions
 {
@@ -57,6 +56,13 @@ namespace Destiny.Core.Flow.Extensions
                 return value.ToString();
             }
 
+            if (type == typeof(ObjectId))
+            {
+
+                ObjectId.TryParse(value.ToString(),out var newValue);
+                return newValue;
+            }
+
             return Convert.ChangeType(value, type);
         }
 
@@ -102,7 +108,7 @@ namespace Destiny.Core.Flow.Extensions
             return !value.IsNull();
         }
 
-  
+
 
         /// <summary>
         /// 判断特性相应是否存在
@@ -129,6 +135,6 @@ namespace Destiny.Core.Flow.Extensions
         }
 
 
-      
+
     }
 }

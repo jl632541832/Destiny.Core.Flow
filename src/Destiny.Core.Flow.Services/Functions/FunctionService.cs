@@ -1,5 +1,4 @@
-﻿using Destiny.Core.Flow.Dependency;
-using Destiny.Core.Flow.Dtos.Functions;
+﻿using Destiny.Core.Flow.Dtos.Functions;
 using Destiny.Core.Flow.Enums;
 using Destiny.Core.Flow.Exceptions;
 using Destiny.Core.Flow.Extensions;
@@ -10,16 +9,13 @@ using Destiny.Core.Flow.Model.Entities.Function;
 using Destiny.Core.Flow.Ui;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Destiny.Core.Flow.Services.Functions
 {
-
     public class FunctionService : IFunctionService
     {
         private readonly IEFCoreRepository<Function, Guid> _functionRepository;
@@ -44,6 +40,7 @@ namespace Destiny.Core.Flow.Services.Functions
         }
 
         private IQueryable<Function> Entities => _functionRepository.Entities;
+
         public Task<OperationResponse> DeleteAsync(Guid id)
         {
             id.NotEmpty(nameof(id));
@@ -52,6 +49,7 @@ namespace Destiny.Core.Flow.Services.Functions
 
         public Task<IPagedResult<FunctionOutputPageList>> GetFunctionPageAsync(PageRequest request)
         {
+
             OrderCondition<Function>[] orderConditions = new OrderCondition<Function>[] { new OrderCondition<Function>(o => o.CreatedTime, SortDirection.Descending) };
             request.OrderConditions = orderConditions;
             return _functionRepository.Entities.ToPageAsync<Function, FunctionOutputPageList>(request);
@@ -67,8 +65,9 @@ namespace Destiny.Core.Flow.Services.Functions
         public async Task<OperationResponse> UpdateAsync(FunctionInputDto dto)
         {
             dto.NotNull(nameof(dto));
-            return await _functionRepository.UpdateAsync(dto,async (f,e)=> {
-                bool isExist = await this.Entities.Where(o =>o.Id!=f.Id&& o.LinkUrl.ToLower() == f.LinkUrl.ToLower()).AnyAsync();
+            return await _functionRepository.UpdateAsync(dto, async (f, e) =>
+            {
+                bool isExist = await this.Entities.Where(o => o.Id != f.Id && o.LinkUrl.ToLower() == f.LinkUrl.ToLower()).AnyAsync();
                 if (isExist)
                 {
                     throw new AppException("此功能已存在!!!");
@@ -78,8 +77,8 @@ namespace Destiny.Core.Flow.Services.Functions
 
         public async Task<OperationResponse<IEnumerable<SelectListItem>>> GetFunctionSelectListItemAsync()
         {
-
-            var functions = await _functionRepository.Entities.OrderBy(o=>o.Name).Select(x => new SelectListItem {
+            var functions = await _functionRepository.Entities.OrderBy(o => o.Name).Select(x => new SelectListItem
+            {
                 Value = x.Id.ToString().ToLower(),
                 Text = x.Name,
                 Selected = false

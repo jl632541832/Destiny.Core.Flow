@@ -1,29 +1,22 @@
 ﻿using Destiny.Core.Flow.Extensions;
 using Destiny.Core.Flow.Model.Entities.Identity;
 using Destiny.Core.Flow.Model.Security;
+using Destiny.Core.Flow.Modules;
 using Destiny.Core.Flow.Options;
-
-using Destiny.Core.Flow.Security.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Destiny.Core.Flow.Modules;
 
 namespace Destiny.Core.Flow.API.Startups
 {
     public class IdentityModule : IdentityModuleBase<UserStore, RoleStore, User, UserRole, Role, Guid, Guid>
     {
 
-  
+
         protected override Action<IdentityOptions> IdentityOption()
         {
             return options =>
@@ -52,7 +45,7 @@ namespace Destiny.Core.Flow.API.Startups
 
         protected override void AddAuthentication(IServiceCollection services)
         {
-          
+
             AppOptionSettings settings = services.GetAppSettings();
             var jwt = settings.Jwt;
 
@@ -69,7 +62,7 @@ namespace Destiny.Core.Flow.API.Startups
                 ClockSkew = TimeSpan.Zero, ////允许的服务器时间偏移量
                 LifetimeValidator = (nbf, exp, token, param) => exp > DateTime.UtcNow
             };
-           
+
             services.AddAuthorization();
             services.AddAuthentication(x =>
             {
@@ -78,10 +71,12 @@ namespace Destiny.Core.Flow.API.Startups
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(jwt =>
             {
-
+                jwt.Authority = settings.Auth?.Authority ?? "http://destinycore.club:5001";
+                jwt.Audience = settings.Auth?.Audience ?? "Destiny.Core.Flow.API";
+                jwt.RequireHttpsMetadata = false;
                 //jwt.SecurityTokenValidators.Clear();
                 //jwt.SecurityTokenValidators.Add(new CmsJwtSecurityTokenHandler());
-                jwt.TokenValidationParameters = tokenValidationParameters;
+                //jwt.TokenValidationParameters = tokenValidationParameters;
                 jwt.Events = new JwtBearerEvents /*jwt自带事件*/
                 {
                     OnAuthenticationFailed = context =>
@@ -98,12 +93,59 @@ namespace Destiny.Core.Flow.API.Startups
                 };
 
             });
-            services.AddScoped<IJwtBearerService, JwtBearerService>();
+
+            //AppOptionSettings settings = services.GetAppSettings();
+            //var jwt = settings.Jwt;
+
+            //var keyByteArray = Encoding.UTF8.GetBytes(jwt.SecretKey);
+            //var signingKey = new SymmetricSecurityKey(keyByteArray);
+            //var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            //var tokenValidationParameters = new TokenValidationParameters
+            //{
+
+            //    IssuerSigningKey = signingKey,
+            //    ValidIssuer = jwt.Issuer ?? "Destiny",//发行人
+            //    ValidAudience = jwt.Audience ?? "Destiny",//订阅人
+            //    //ValidateLifetime = false,   ////是否验证Token有效期，使用当前时间与Token的Claims中的NotBefore和Expires对比
+            //    ClockSkew = TimeSpan.Zero, ////允许的服务器时间偏移量
+            //    LifetimeValidator = (nbf, exp, token, param) => exp > DateTime.UtcNow
+            //};
+
+            //services.AddAuthorization();
+            //services.AddAuthentication(x =>
+            //{
+            //    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    //x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //}).AddJwtBearer(jwt =>
+            //{
+
+            //    //jwt.SecurityTokenValidators.Clear();
+            //    //jwt.SecurityTokenValidators.Add(new CmsJwtSecurityTokenHandler());
+            //    jwt.TokenValidationParameters = tokenValidationParameters;
+            //    jwt.Events = new JwtBearerEvents /*jwt自带事件*/
+            //    {
+            //        OnAuthenticationFailed = context =>
+            //        {
+
+            //            // 如果过期，则把<是否过期>添加到，返回头信息中
+            //            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            //            {
+            //                context.Response.Headers.Add("Token-Expired", "true");
+            //            }
+            //            return Task.CompletedTask;
+            //        }
+
+            //    };
+
+            //});
+
+            //services.AddScoped<IJwtBearerService, JwtBearerService>();
         }
         protected override IdentityBuilder UseIdentityBuilder(IdentityBuilder identityBuilder)
         {
             return identityBuilder.AddDefaultTokenProviders();
         }
     }
-    
+
 }
