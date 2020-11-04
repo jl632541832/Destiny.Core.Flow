@@ -4,13 +4,13 @@
 **Destiny.Core.Flow是一个基于`.net core3.1`平台轻量级的模块化开发框架Admin管理应用框架，旨在提升团队的快速开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装等组成。**
 + ## 在线地址
 
-✔ [在线展示](http://admin.destinycore.club)
+✔ [在线展示](http://admin.destinycore.club)（这版本目前没法使用（后面再维护），VUE版本正在开发。。。）
 
 账号Test002    123456
  
 ✔ 后面支持VUE版本
 
-✔ [在线展示后端API链接](http://api.destinycore.club)
+✔ [在线展示后端API链接](http://api.destinycore.club) 目前不维护
 
 + ## 关联前端
 
@@ -29,12 +29,18 @@
 
     + #### 角色管理
 
+    + #### 菜单管理
+      
     + #### 功能管理
 
     + #### 数据字典
 
     + #### 组织架构
-
+   
+    + #### 操作审计
+    
+    + #### 数据审计
+    
     + #### 工作流（暂时不支持）
 
     + To do
@@ -54,7 +60,15 @@
     + #### Destiny.Core.Flow.Identitys
 
       重写微软Identity自带用户角色的代码。
-
+      
+    + #### Destiny.Core.Flow.IdentityServer
+ 
+      重写IdentityServer相关接口，及相关映射，实现通过仓储操作相关数据
+      
+     + #### Destiny.Core.Flow.IdentityServer.Entities
+ 
+       IdentityServer相关实体
+      
     + #### Destiny.Core.Flow.AspNetCore
 
       NetCoreAPI通用层，权限过滤器，日志过滤器、异常中间件、控制器返回同意格式模型。
@@ -86,7 +100,9 @@
     + #### Destiny.Core.Flow.API
 
       API接口定义。
-
+   
+    + #### Destiny.Core.Flow.AuthenticationCenter
+      IdentityServer授权中心
     + to do...
 
   + ## Moduls 模块层
@@ -104,7 +120,9 @@
     + #### Destiny.Core.Flow.Consul 服务发现模块
 
     + #### Destiny.Core.Flow.SwaggerUI 模块
+    
     + #### Destiny.Core.Flow.MongoDB 模块
+      注意MongoDB链接 mongodb://127.0.0.2/Test
       集成MongoDB分页查询，添加，更新，删除。实现MongoDB单独仓储
 + ## 3.框架技术
 
@@ -113,6 +131,8 @@
     + #### MySql
 
     + #### Redis
+    
+    + #### MongoDB
 
   + ### .Net Core技术
 
@@ -130,7 +150,7 @@
 
     + #### EntityFrameworkCore ORM框架
 
-    + ### MongoDB 
+    + ### MongoDB 切记MongoDB链接 mongodb://127.0.0.2/Test
     + ### Redis 
 
   + 

@@ -47,20 +47,23 @@ namespace Destiny.Core.Flow.Services.Menu
         public async Task<OperationResponse> CreateAsync(MenuInputDto input)
         {
             input.NotNull(nameof(input));
-            return await _unitOfWork.UseTranAsync(async () =>
-            {
-                var result = await _menuRepository.InsertAsync(input);
-                if (input.FunctionId?.Any() == true)
-                {
-                    int count = await _menuFunction.InsertAsync(input.FunctionId.Select(x => new MenuFunction
-                    {
-                        MenuId = input.Id,
-                        FunctionId = x
-                    }).ToArray());
-                }
-                return new OperationResponse("保存成功", OperationResponseType.Success);
-            });
+            return  await _menuRepository.InsertAsync(input); 
+            //return await _unitOfWork.UseTranAsync(async () =>
+            //{
+            //    var result = await _menuRepository.InsertAsync(input);
+            //    if (input.FunctionId?.Any() == true)
+            //    {
+            //        int count = await _menuFunction.InsertAsync(input.FunctionId.Select(x => new MenuFunction
+            //        {
+            //            MenuId = input.Id,
+            //            FunctionId = x
+            //        }).ToArray());
+            //    }
+            //    return new OperationResponse("保存成功", OperationResponseType.Success);
+            //});
         }
+
+
 
         public async Task<OperationResponse> DeleteAsync(Guid id)
         {
@@ -70,20 +73,21 @@ namespace Destiny.Core.Flow.Services.Menu
         public async Task<OperationResponse> UpdateAsync(MenuInputDto input)
         {
             input.NotNull(nameof(input));
-            return await _unitOfWork.UseTranAsync(async () =>
-            {
-                var result = await _menuRepository.UpdateAsync(input);
-                await _menuFunction.DeleteBatchAsync(x => x.MenuId == input.Id);
-                if (input.FunctionId?.Any() == true)
-                {
-                    int count = await _menuFunction.InsertAsync(input.FunctionId.Select(x => new MenuFunction
-                    {
-                        MenuId = input.Id,
-                        FunctionId = x
-                    }).ToArray());
-                }
-                return new OperationResponse("保存成功", OperationResponseType.Success);
-            });
+            return await _menuRepository.UpdateAsync(input);
+            //return await _unitOfWork.UseTranAsync(async () =>
+            //{
+            //    var result = await _menuRepository.UpdateAsync(input);
+            //    await _menuFunction.DeleteBatchAsync(x => x.MenuId == input.Id);
+            //    if (input.FunctionId?.Any() == true)
+            //    {
+            //        int count = await _menuFunction.InsertAsync(input.FunctionId.Select(x => new MenuFunction
+            //        {
+            //            MenuId = input.Id,
+            //            FunctionId = x
+            //        }).ToArray());
+            //    }
+            //    return new OperationResponse("保存成功", OperationResponseType.Success);
+            //});
         }
 
         /// <summary>
@@ -133,7 +137,7 @@ namespace Destiny.Core.Flow.Services.Menu
         {
             var menu = await _menuRepository.GetByIdAsync(Id);
             var menudto = menu.MapTo<MenuOutputLoadDto>();
-            menudto.FunctionIds = (await _menuFunction.Entities.Where(x => x.MenuId == Id && x.IsDeleted == false).ToListAsync()).Select(x => x.FunctionId).ToArray();
+            
             return new OperationResponse<MenuOutputLoadDto>(MessageDefinitionType.LoadSucces, menudto, OperationResponseType.Success);
         }
 
@@ -325,7 +329,7 @@ namespace Destiny.Core.Flow.Services.Menu
         /// <returns></returns>
         public async Task<TreeResult<MenuTreeOutDto>> GetAllMenuTreeAsync(MenuEnum menu= MenuEnum.Menu)
         {
-            return await _menuRepository.Entities.Where(o=>o.Type== menu).ToTreeResultAsync<MenuEntity, MenuTreeOutDto>(
+            return await _menuRepository.Entities.OrderBy(o=>o.Sort).Where(o=>o.Type== menu).ToTreeResultAsync<MenuEntity, MenuTreeOutDto>(
               (p, c) =>
               {
                   return c.ParentId == null || c.ParentId == Guid.Empty;
