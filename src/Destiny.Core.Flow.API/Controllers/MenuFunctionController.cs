@@ -18,7 +18,7 @@ namespace Destiny.Core.Flow.API.Controllers
     /// </summary>
     [Description("菜单功能")]
     
-    public class MenuFunctionController : ApiControllerBase
+    public class MenuFunctionController : AdminControllerBase
     {
         private readonly IMenuFunctionServices _menuFunctionServices;
 
@@ -35,7 +35,7 @@ namespace Destiny.Core.Flow.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Description("批量添加功能菜单")]
-        public async Task<AjaxResult> BatchAddMenuFunctionAsync([FromBody] MenuFunctionInputDto menuFunctionInputDto)
+        public async Task<AjaxResult> BatchAddMenuFunctionAsync([FromBody] BatchAddMenuFunctionInputDto menuFunctionInputDto)
         {
             return (await _menuFunctionServices.BatchAddMenuFunctionAsync(menuFunctionInputDto)).ToAjaxResult();
         }
@@ -60,9 +60,9 @@ namespace Destiny.Core.Flow.API.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost]
         [Description("根据菜单ID得到菜单功能分页")]
-        public async Task<PageList<MenuFunctionOutPageListDto>> GetMenuFunctionByMenuIdPageAsync(MenuFunctionPageRequestDto request)
+        public async Task<PageList<MenuFunctionOutPageListDto>> GetMenuFunctionByMenuIdPageAsync([FromBody] MenuFunctionPageRequestDto request)
         {
             return (await _menuFunctionServices.GetMenuFunctionByMenuIdPageAsync(request)).ToPageList();
         }
