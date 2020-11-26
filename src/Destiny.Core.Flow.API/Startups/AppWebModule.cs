@@ -9,7 +9,6 @@ using Destiny.Core.Flow.MiniProfiler;
 using Destiny.Core.Flow.Model;
 using Destiny.Core.Flow.Modules;
 using Destiny.Core.Flow.Options;
-using Destiny.Core.Flow.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +20,7 @@ using System.Security.Principal;
 namespace Destiny.Core.Flow.API.Startups
 {
     [DependsOn(typeof(DependencyAppModule),
+              typeof(MiniProfilerModule),
                typeof(AspNetCoreSwaggerModule),
                typeof(IdentityModule),
                typeof(FunctionModule),
@@ -30,8 +30,8 @@ namespace Destiny.Core.Flow.API.Startups
                typeof(CSRedisModule),
                typeof(MongoDBModelule),
                typeof(MigrationModule),
-               typeof(CodeGeneratorModeule),
-               typeof(MiniProfilerModule)
+               typeof(CodeGeneratorModeule)
+
         )]
     public class AppWebModule : AppModule
     {
@@ -80,13 +80,14 @@ namespace Destiny.Core.Flow.API.Startups
                 IHttpContextAccessor accessor = provider.GetService<IHttpContextAccessor>();
                 return accessor?.HttpContext?.User;
             });
+
         }
 
         public override void ApplicationInitialization(ApplicationContext context)
         {
             var app = context.GetApplicationBuilder();
             app.UseRouting();
- 
+
             if (!_corePolicyName.IsNullOrEmpty())
             {
                 app.UseCors(_corePolicyName); //添加跨域中间件
