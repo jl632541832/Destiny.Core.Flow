@@ -1479,7 +1479,6 @@ namespace Destiny.Core.Flow.Model.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Component")
-                        .IsRequired()
                         .HasColumnType("varchar(400) CHARACTER SET utf8mb4")
                         .HasMaxLength(400);
 
@@ -1537,7 +1536,6 @@ namespace Destiny.Core.Flow.Model.Migrations
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Path")
-                        .IsRequired()
                         .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
                         .HasMaxLength(200);
 

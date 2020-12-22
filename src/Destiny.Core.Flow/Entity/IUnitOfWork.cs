@@ -13,6 +13,12 @@ namespace Destiny.Core.Flow.Entity
     public interface IUnitOfWork : IDisposable
     {
         /// <summary>
+        /// 是否提交
+        /// </summary>
+        bool HasCommit();
+
+
+        /// <summary>
         /// 释放时触发
         /// </summary>
         Action OnDispose { get;set; }
@@ -45,34 +51,7 @@ namespace Destiny.Core.Flow.Entity
         /// </summary>
         void Rollback();
 
-        /// <summary>
-        /// 开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="action">要执行的操作</param>
-        /// <returns></returns>
-        void UseTran(Action action);
-
-        /// <summary>
-        /// 异步开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="action">要执行的操作</param>
-        /// <returns></returns>
-        Task UseTranAsync(Func<Task> func);
-
-        /// <summary>
-        /// 开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="func"></param>
-        /// <returns>返回操作结果</returns>
-        OperationResponse UseTran(Func<OperationResponse> func);
-
-        /// <summary>
-        /// 开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="func"></param>
-        /// <returns>返回操作结果</returns>
-        Task<OperationResponse> UseTranAsync(Func<Task<OperationResponse>> func);
-
+     
         /// <summary>
         /// 异步提交事务
         /// </summary>
@@ -85,7 +64,9 @@ namespace Destiny.Core.Flow.Entity
         /// <returns></returns>
         Task RollbackAsync();
 
-  
+        void Push();
+
+        void Pop();
 
     }
 }

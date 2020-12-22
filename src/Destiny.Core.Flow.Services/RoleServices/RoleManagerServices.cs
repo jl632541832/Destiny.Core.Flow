@@ -24,14 +24,14 @@ namespace Destiny.Core.Flow.Services.RoleServices
     {
         private readonly RoleManager<Role> _roleManager = null;
         private readonly IEFCoreRepository<RoleMenuEntity, Guid> _roleMenuRepository;
-        private readonly IEventBus _eventBus = null;
+        private readonly IMediatorHandler _eventBus = null;
         private readonly IUnitOfWork _unitOfWork = null;
 
         /// <summary>
         /// 构造函数注入
         /// </summary>
         /// <param name="roleManager"></param>
-        public RoleManagerServices(RoleManager<Role> roleManager, IEFCoreRepository<RoleMenuEntity, Guid> roleMenuRepository, IEventBus eventBus, IUnitOfWork unitOfWork)
+        public RoleManagerServices(RoleManager<Role> roleManager, IEFCoreRepository<RoleMenuEntity, Guid> roleMenuRepository, IMediatorHandler eventBus, IUnitOfWork unitOfWork)
         {
             _roleManager = roleManager;
             _roleMenuRepository = roleMenuRepository;
@@ -164,6 +164,7 @@ namespace Destiny.Core.Flow.Services.RoleServices
 
         public async Task<OperationResponse> SetRoleMenu(Guid roleId, Guid[] menuIds)
         {
+
             return await _roleMenuRepository.UnitOfWork.UseTranAsync(async () =>
             {
                 roleId.NotEmpty(nameof(roleId));
@@ -173,9 +174,9 @@ namespace Destiny.Core.Flow.Services.RoleServices
 
                 }
 
-              
-                 await _roleMenuRepository.DeleteBatchAsync(o => o.RoleId == roleId);
-                
+
+                await _roleMenuRepository.DeleteBatchAsync(o => o.RoleId == roleId);
+
                 var roleMenuList = menuIds.Select(x => new RoleMenuEntity
                 {
                     MenuId = x,
@@ -195,7 +196,7 @@ namespace Destiny.Core.Flow.Services.RoleServices
                 return new OperationResponse("设置角色菜单成功!!!", OperationResponseType.Success);
 
             });
-          
+
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Destiny.Core.Flow.AspNetCore.Api;
+using Destiny.Core.Flow.AspNetCore.Mvc.Filters;
 using Destiny.Core.Flow.AspNetCore.Ui;
 using Destiny.Core.Flow.Audit;
 using Destiny.Core.Flow.Dtos;
@@ -39,7 +40,8 @@ namespace Destiny.Core.Flow.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Description("异步创建用户")]
-
+        [ServiceFilter(typeof(AuditLogFilterAttribute))]
+        //[ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<AjaxResult> CreateAsync([FromBody] UserInputDto dto)
         {
 
@@ -59,6 +61,7 @@ namespace Destiny.Core.Flow.API.Controllers
 
         [HttpPost]
         [Description("异步更新用户")]
+        [ServiceFilter(typeof(AuditLogFilterAttribute))]
 
         public async Task<AjaxResult> UpdateAsync([FromBody] UserUpdateInputDto dto)
         {

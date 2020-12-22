@@ -4,22 +4,32 @@
 **Destiny.Core.Flow是一个基于`.net core3.1`平台轻量级的模块化开发框架Admin管理应用框架，旨在提升团队的快速开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装等组成。
 Destiny.Core.Flow重写微软的identity用户角色和重写IDS4的实体，以及IDS4的查询仓库实现，将IDS4和Identity以及其他模块合并成为一个上下文，在使用IDS4时不需要在维护几个上下文，统一了上下文管理。
 框架lambda查询不需要在后台写各种判断，所有的查询条件通过前端传入，从而减少后台的一些字符段判断等，使用动态拼接lambda。**
++ # 本项目长期维护有疑问请提交issues
 + ## 在线地址
 
 ✔ [在线展示](http://admin.destinycore.club)
 
 账号Test002    123456
- 
+
 
 ✔ [在线展示后端API链接](http://api.destinycore.club) 
 
 ✔ [VUE版本]
- 
+
  https://github.com/DestinyCore/Destiny.Core.Flow.WebUI
 
 + ## 关联前端
 
 ✔ [关联前端项目链接](https://github.com/DestinyCore/Destiny.Core.Flow.WebUI)
+
++ ## nuget 模板包
+
+  + [admin框架模板]([NuGet Gallery | SuktCoreWebApi.Templates 1.4.3](https://www.nuget.org/packages/SuktCoreWebApi.Templates/))
+  + [非admin框架模板]([NuGet Gallery | SuktCoreBusinessWebApi.Templates 1.0.3](https://www.nuget.org/packages/SuktCoreBusinessWebApi.Templates/))
+  + 先执行安装命令
+    + 创建模板项目命令 
+    + admin 模板创建命令    dotnet new suktcorebusinesswebapitpl -n your name  
+    + 非 admin 模板命令       dotnet new suktcorewebapitpl -n your name
 
 + ## 采用技术栈
 
@@ -41,13 +51,15 @@ Destiny.Core.Flow重写微软的identity用户角色和重写IDS4的实体，以
     + #### 数据字典
 
     + #### 组织架构
-   
+
     + #### 操作审计
     
     + #### 数据审计
     
-    + #### 工作流（暂时不支持）
+    + #### 文档管理
 
+    + #### 工作流（暂时不支持）
+    
     + To do
 
 + ## 2.框架分层
@@ -67,11 +79,11 @@ Destiny.Core.Flow重写微软的identity用户角色和重写IDS4的实体，以
       重写微软Identity自带用户角色的代码。
       
     + #### Destiny.Core.Flow.IdentityServer
- 
+
       重写IdentityServer相关接口，及相关映射，实现通过仓储操作相关数据
       
      + #### Destiny.Core.Flow.IdentityServer.Entities
- 
+
        IdentityServer相关实体
       
     + #### Destiny.Core.Flow.AspNetCore
@@ -105,7 +117,7 @@ Destiny.Core.Flow重写微软的identity用户角色和重写IDS4的实体，以
     + #### Destiny.Core.Flow.API
 
       API接口定义。
-   
+  
     + #### Destiny.Core.Flow.AuthenticationCenter
       IdentityServer授权中心
     + to do...
@@ -129,6 +141,7 @@ Destiny.Core.Flow重写微软的identity用户角色和重写IDS4的实体，以
     + #### Destiny.Core.Flow.MongoDB 模块
       注意MongoDB链接 mongodb://127.0.0.2/Test
       集成MongoDB分页查询，添加，更新，删除。实现MongoDB单独仓储
+  
 + ## 3.框架技术
 
   + ### 数据库
@@ -171,6 +184,4 @@ Destiny.Core.Flow重写微软的identity用户角色和重写IDS4的实体，以
 ### 框架博客
 
 + https://www.cnblogs.com/pual13/p/12587113.html 项目名字可能有些不同思路一样
-
-
 

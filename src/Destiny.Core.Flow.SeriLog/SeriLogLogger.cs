@@ -16,17 +16,31 @@ namespace Destiny.Core.Flow.SeriLog
         public static void SetSeriLoggerToFile(string fileName, string eshost)
         {
             Log.Logger = new LoggerConfiguration()
+#if DEBUG
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+#else
+                 .MinimumLevel.Error()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+#endif
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
+#if DEBUG
+
+       .WriteTo.Console(LogEventLevel.Information)
+                       .WriteTo.Map(le => MapData(le),
+                (key, log) =>
+                 log.Async(o => o.File(Path.Combine(fileName, @$"{key.time:yyyy-MM-dd}\{key.level.ToString().ToLower()}.txt"))), restrictedToMinimumLevel: LogEventLevel.Information)
+#else
+       .WriteTo.Console(LogEventLevel.Error)
+                       .WriteTo.Map(le => MapData(le),
+                (key, log) =>
+                 log.Async(o => o.File(Path.Combine(fileName, @$"{key.time:yyyy-MM-dd}\{key.level.ToString().ToLower()}.txt"))), restrictedToMinimumLevel:LogEventLevel.Error)
+#endif
+
                 //.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(eshost))
                 //{
                 //    AutoRegisterTemplate = true,
                 //})
-                .WriteTo.Map(le => MapData(le),
-                (key, log) =>
-                 log.Async(o => o.File(Path.Combine(fileName, @$"{key.time:yyyy-MM-dd}\{key.level.ToString().ToLower()}.txt"))))
                 .CreateLogger();
 
             (DateTime time, LogEventLevel level) MapData(LogEvent logEvent)

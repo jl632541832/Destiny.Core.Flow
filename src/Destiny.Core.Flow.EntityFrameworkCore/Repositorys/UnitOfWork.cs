@@ -5,8 +5,10 @@ using Destiny.Core.Flow.Ui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,7 +31,16 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// <summary>
         /// 是否提交
         /// </summary>
-        public bool HasCommitted { get; private set; }
+        /// <returns></returns>
+        public bool HasCommit()
+        {
+            return HasCommitted;
+        }
+
+        /// <summary>
+        /// 是否提交
+        /// </summary>
+        private bool HasCommitted { get;  set; }
 
         /// <summary>
         /// 事务
@@ -38,7 +49,7 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
 
         private bool _disposed;
 
-        private readonly ILogger _logger = null;
+        //private readonly ILogger _logger = null;
 
         private DbConnection _connection = null;
 
@@ -47,11 +58,42 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             _dbContext = dbContext as DbContextBase;
         }
 
+
+        private Stack<bool> _callStack = new Stack<bool>();
+
+        /// <summary>
+        /// 为了解决多接口使用事务问题
+        /// </summary>
+
+        public void Push()
+        {
+            _callStack.Push(true);
+        }
+
+        public void Pop()
+        {
+            if (_callStack.Any())
+            {
+                _callStack.Pop();
+            }
+        }
+
+
+
+
+        public bool Enabled => _callStack.Count <= 0;
+
         /// <summary>
         /// 开启事务
         /// </summary>
         public virtual void BeginTransaction()
         {
+
+            if (!Enabled)
+            {
+                return;
+            }
+  
             if (_transaction?.Connection == null)
             {
                 if (_connection.State != ConnectionState.Open)
@@ -61,130 +103,34 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
                 _transaction = _connection.BeginTransaction();
             }
 
-            _dbContext.Database.UseTransaction(_transaction);
+            if (_dbContext.IsRelationalTransaction())
+            {
+                _dbContext.Database.UseTransaction(_transaction);
+            }
+            else
+            {
+
+                _dbContext.Database.BeginTransaction();
+            }
+          
 
             HasCommitted = false;
         }
 
 
-        /// <summary>
-        /// 开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="action">要执行的操作</param>
-        /// <returns></returns>
-        public void UseTran(Action action)
-        {
-            action.NotNull(nameof(action));
-            if (HasCommitted)
-            {
-                return;
-            }
-
-            BeginTransaction();
-            try
-            {
-                action?.Invoke();
-                Commit();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                this.Rollback();
-            }
-        }
-
-        public async Task UseTranAsync(Func<Task> func)
-        {
-            func.NotNull(nameof(func));
-            if (HasCommitted)
-            {
-                return;
-            }
-
-            BeginTransaction();
-            await func?.Invoke();
-            Commit();
-        }
-
-        /// <summary>
-        /// 开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="func"></param>
-        /// <returns>返回操作结果</returns>
-        public async Task<OperationResponse> UseTranAsync(Func<Task<OperationResponse>> func)
-        {
-            func.NotNull(nameof(func));
-            OperationResponse result = new OperationResponse();
-            if (HasCommitted)
-            {
-                result.Type = OperationResponseType.NoChanged;
-                result.Message = "事务已提交!!";
-                return result;
-            }
-
-            try
-            {
-                await this.BeginTransactionAsync();
-                result = await func.Invoke();
-                if (!result.Success)
-                {
-                    await this.RollbackAsync();
-                    return result;
-                }
-                await this.CommitAsync();
-            }
-            catch (Exception ex)
-            {
-                await this.RollbackAsync();
-                //_logger.LogError(ex.Message, ex);
-                return new OperationResponse()
-                {
-                    Type = OperationResponseType.Error,
-                    Message = ex.Message,
-                };
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 开启事务 如果成功提交事务，失败回滚事务
-        /// </summary>
-        /// <param name="func"></param>
-        /// <returns>返回操作结果</returns>
-        public OperationResponse UseTran(Func<OperationResponse> func)
-        {
-            func.NotNull(nameof(func));
-            OperationResponse result = new OperationResponse();
-            if (HasCommitted)
-            {
-                result.Type = OperationResponseType.NoChanged;
-                result.Message = "事务已提交!!";
-                return result;
-            }
-            try
-            {
-                this.BeginTransaction();
-                result = func.Invoke();
-                this.Commit();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                this.Rollback();
-                _logger.LogError(ex.Message, ex);
-                return new OperationResponse()
-                {
-                    Type = OperationResponseType.Error,
-                    Message = ex.Message,
-                };
-            }
-        }
 
         /// <summary>
         /// 开启事务异步
         /// </summary>
         public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
+
+
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (_transaction?.Connection == null)
             {
                 if (_connection.State != ConnectionState.Open)
@@ -194,7 +140,18 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
                 _transaction = _connection.BeginTransaction();
             }
 
-            _dbContext.Database.UseTransaction(_transaction);
+
+            if (_dbContext.IsRelationalTransaction())
+            {
+
+                _dbContext.Database.UseTransaction(_transaction);
+            }
+            else {
+                _dbContext.Database.BeginTransaction();
+
+
+            }
+
 
             HasCommitted = false;
         }
@@ -204,12 +161,24 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// </summary>
         public void Commit()
         {
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (HasCommitted || _transaction == null)
             {
                 return;
             }
             _transaction.Commit();
-            _dbContext.Database.CurrentTransaction.Dispose();
+            if (_dbContext.IsRelationalTransaction())
+            {
+                _dbContext.Database.CurrentTransaction.Dispose();
+            }
+            else {
+                _dbContext.Database.CommitTransaction();
+            }
+       
             HasCommitted = true;
         }
 
@@ -219,12 +188,26 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// <returns></returns>
         public async Task CommitAsync()
         {
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (HasCommitted || _transaction == null)
             {
                 return;
             }
             await _transaction.CommitAsync();
-            await _dbContext.Database.CurrentTransaction.DisposeAsync();
+
+            if (_dbContext.IsRelationalTransaction())
+            {
+                await _dbContext.Database.CurrentTransaction.DisposeAsync();
+            }
+            else
+            {
+                _dbContext.Database.CommitTransaction();
+            }
+           
             HasCommitted = true;
         }
 
@@ -251,6 +234,7 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
             _transaction?.Dispose();
             _dbContext.Dispose();
             OnDispose?.Invoke();
+            _callStack?.Clear();
             _disposed = true;
   
         }
@@ -260,14 +244,25 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// </summary>
         public void Rollback()
         {
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (_transaction?.Connection != null)
             {
                 _transaction.Rollback();
             }
 
-            if (_dbContext.Database.CurrentTransaction != null)
+            if (_dbContext.IsRelationalTransaction())
             {
-                _dbContext.Database.CurrentTransaction.Dispose();
+                if (_dbContext.Database.CurrentTransaction != null)
+                {
+                    _dbContext.Database.CurrentTransaction.Dispose();
+                }
+            }
+            else {
+                _dbContext.Database.RollbackTransaction();
             }
             HasCommitted = true;
         }
@@ -278,15 +273,27 @@ namespace Destiny.Core.Flow.EntityFrameworkCore
         /// <returns></returns>
         public async Task RollbackAsync()
         {
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (_transaction?.Connection != null)
             {
                 await _transaction.RollbackAsync();
             }
 
-            if (_dbContext.Database.CurrentTransaction != null)
+            if (_dbContext.IsRelationalTransaction())
             {
-                await _dbContext.Database.CurrentTransaction.DisposeAsync();
+                if (_dbContext.Database.CurrentTransaction != null)
+                {
+                    await _dbContext.Database.CurrentTransaction.DisposeAsync();
+                }
             }
+            else {
+                _dbContext.Database.RollbackTransaction();
+            }
+        
             HasCommitted = true;
         }
     }
