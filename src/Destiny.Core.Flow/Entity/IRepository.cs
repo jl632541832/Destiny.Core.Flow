@@ -43,19 +43,7 @@ namespace Destiny.Core.Flow
         Task<TEntity> GetByIdAsync(TPrimaryKey primaryKey);
 
 
-        /// <summary>
-        /// 根据ID得到Dto实体
-        /// </summary>
-        /// <param name="primaryKey">主键</param>
-        /// <returns>返回查询后实体并转成Dto</returns>
-        TDto GetByIdToDto<TDto>(TPrimaryKey primaryKey) where TDto : class, new();
-
-        /// <summary>
-        /// 异步根据ID得到Dto实体
-        /// </summary>
-        /// <param name="primaryKey">主键</param>
-        /// <returns>返回查询后实体并转成Dto</returns>
-        Task<TDto> GetByIdToDtoAsync<TDto>(TPrimaryKey primaryKey) where TDto : class, new();
+       
         /// <summary>
         ///查询不跟踪数据源
         /// </summary>
@@ -79,6 +67,13 @@ namespace Destiny.Core.Flow
         /// <returns>返回查询后数据源</returns>
         IQueryable<TEntity> TrackQuery(Expression<Func<TEntity, bool>> predicate);
 
+        /// <summary>
+        /// 异步得到实体
+        /// </summary>
+        /// <param name="predicate">条件</param>
+        /// <returns>返回查询后实体</returns>
+        Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate);
+
         #endregion
 
 
@@ -100,8 +95,12 @@ namespace Destiny.Core.Flow
         /// <param name="entity">要插入实体</param>
         /// <returns>影响的行数</returns>
         Task<int> InsertAsync(TEntity entity);
-
-
+        /// <summary>
+        /// 异步添加单条实体
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        Task<OperationResponse> InsertAsync(TEntity entity, Func<TEntity, Task> checkFunc = null, Func<TEntity, TEntity, Task<TEntity>> insertFunc = null, Func<TEntity, TEntity> completeFunc = null);
 
         /// <summary>
         /// 以异步批量插入实体

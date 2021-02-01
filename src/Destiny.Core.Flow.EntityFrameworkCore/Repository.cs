@@ -13,7 +13,6 @@ using System.Linq.Expressions;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using Z.EntityFramework.Extensions;
 using Z.EntityFramework.Plus;
 
 namespace Destiny.Core.Flow
@@ -69,19 +68,7 @@ namespace Destiny.Core.Flow
         /// <returns>返回查询后实体</returns>
         public virtual async Task<TEntity> GetByIdAsync(TPrimaryKey primaryKey) => await _dbSet.FindAsync(primaryKey);
 
-        /// <summary>
-        /// 根据ID得到Dto实体
-        /// </summary>
-        /// <param name="primaryKey">主键</param>
-        /// <returns>返回查询后实体并转成Dto</returns>
-        public virtual TDto GetByIdToDto<TDto>(TPrimaryKey primaryKey) where TDto : class, new() => this.GetById(primaryKey).MapTo<TDto>();
-
-        /// <summary>
-        /// 异步根据ID得到Dto实体
-        /// </summary>
-        /// <param name="primaryKey">主键</param>
-        /// <returns></returns>
-        public virtual async Task<TDto> GetByIdToDtoAsync<TDto>(TPrimaryKey primaryKey) where TDto : class, new() => (await this.GetByIdAsync(primaryKey)).MapTo<TDto>();
+   
 
         /// <summary>
         ///查询不跟踪数据源
@@ -117,6 +104,19 @@ namespace Destiny.Core.Flow
         {
             predicate.NotNull(nameof(predicate));
             return this.TrackEntities.Where(predicate);
+        }
+
+        /// <summary>
+        /// 异步得到实体
+        /// </summary>
+        /// <param name="predicate">条件</param>
+        /// <returns>返回查询后实体</returns>
+
+        public  Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+
+            predicate.NotNull(nameof(predicate));
+            return this._dbSet.FirstOrDefaultAsync(predicate);
         }
 
         #endregion 查询
@@ -167,6 +167,48 @@ namespace Destiny.Core.Flow
             {
                 return new OperationResponse(ex.Message, OperationResponseType.Error);
             }
+        }
+        /// <summary>
+        /// 异步添加单条实体
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public virtual async Task<OperationResponse> InsertAsync(TEntity entity, Func<TEntity, Task> checkFunc = null, Func<TEntity, TEntity, Task<TEntity>> insertFunc = null, Func<TEntity, TEntity> completeFunc = null)
+        {
+            entity.NotNull(nameof(entity));
+            try
+            {
+                if (checkFunc.IsNotNull())
+                {
+                    await checkFunc(entity);
+                }
+                if (!insertFunc.IsNull())
+                {
+                    entity = await insertFunc(entity, entity);
+                }
+                entity = CheckInsert(entity);
+                await _dbSet.AddAsync(entity);
+
+                if (completeFunc.IsNotNull())
+                {
+                    entity = completeFunc(entity);
+                }
+                int count = await _dbContext.SaveChangesAsync();
+                return new OperationResponse(count > 0 ? "添加成功" : "操作没有引发任何变化", count > 0 ? OperationResponseType.Success : OperationResponseType.NoChanged);
+            }
+            catch (AppException e)
+            {
+                return new OperationResponse(e.Message, OperationResponseType.Error);
+            }
+            catch (Exception ex)
+            {
+                return new OperationResponse(ex.Message, OperationResponseType.Error);
+            }
+            //entity.NotNull(nameof(entity));
+            //entity = CheckInsert(entity);
+            //await _dbSet.AddAsync(entity);
+            //int count = await _dbContext.SaveChangesAsync();
+            //return new OperationResponse(count > 0 ? ResultMessage.InsertSuccess : ResultMessage.NoChangeInOperation, count > 0 ? OperationEnumType.Success : OperationEnumType.NoChanged);
         }
 
         /// <summary>
@@ -644,6 +686,7 @@ namespace Destiny.Core.Flow
 
             return updateExpression1;
         }
+
 
         #endregion 其他
     }

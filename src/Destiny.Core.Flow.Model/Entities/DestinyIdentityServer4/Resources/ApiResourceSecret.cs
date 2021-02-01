@@ -1,4 +1,5 @@
-﻿using Destiny.Core.Flow.Entity;
+﻿using Destiny.Core.Flow.Audit;
+using Destiny.Core.Flow.Entity;
 using Destiny.Core.Flow.IdentityServer.Entities;
 using System;
 using System.ComponentModel;
@@ -8,7 +9,8 @@ namespace Destiny.Core.Flow.Model.DestinyIdentityServer4
     /// <summary>
     /// api资源
     /// </summary>
-    [DisplayName("api资源")]
+    [DisplayName("api资源秘钥")]
+    [DisableAuditing]
     public class ApiResourceSecret : ApiResourceSecretBase, IFullAuditedEntity<Guid>
     {
         #region 公共属性

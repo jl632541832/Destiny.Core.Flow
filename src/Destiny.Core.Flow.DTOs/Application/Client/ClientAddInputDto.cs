@@ -1,11 +1,10 @@
-﻿using Destiny.Core.Flow.Entity;
-using System;
+﻿using Destiny.Core.Flow.Dtos.PlatformApplication;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Destiny.Core.Flow.Dtos.PlatformApplication
+namespace Destiny.Core.Flow.Dtos.Application
 {
-    public class ApplicationClientInputDto : InputDto<Guid>
+    public class ClientAddInputDto
     {
         /// <summary>
         /// 客户端Id
@@ -30,7 +29,7 @@ namespace Destiny.Core.Flow.Dtos.PlatformApplication
         /// 客户端令牌
         /// </summary>
         [DisplayName("客户端令牌")]
-        public string ClientSecrets { get; set; }
+        public List<Secret> ClientSecrets { get; set; }
         /// <summary>
         /// 回调地址
         /// </summary>
@@ -47,5 +46,13 @@ namespace Destiny.Core.Flow.Dtos.PlatformApplication
         /// 客户端访问作用域
         /// </summary>
         public List<string> AllowedScopes { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ProtocolType { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public ICollection<string> AllowedIdentityTokenSigningAlgorithms { get; set; }
     }
 }
